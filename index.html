@@ -372,6 +372,26 @@
       background: var(--accent-bg);
     }
 
+    .nav-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 6px;
+      margin-left: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--paper);
+      background: var(--ink-faint);
+      border-radius: 999px;
+      transition: background var(--dur-fast) var(--ease);
+    }
+
+    .nav-tab.active .nav-count {
+      background: var(--accent);
+    }
+
     .icon-btn {
       width: 36px;
       height: 36px;
@@ -447,8 +467,19 @@
     }
 
     /* ============ COMPOSE ============ */
+    .compose-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
     .compose {
       margin-bottom: var(--s-8);
+      order: 2;
+    }
+
+    .reflection {
+      order: 1;
+      margin-bottom: var(--s-7);
     }
 
     .compose-prompt {
@@ -555,7 +586,6 @@
     /* ============ REFLECTION ============ */
     .reflection {
       display: none;
-      margin-top: var(--s-7);
       animation: reflectionEnter var(--dur-slow) var(--ease);
     }
 
@@ -886,7 +916,7 @@
         </div>
         <nav class="header-nav" role="navigation" aria-label="Main">
           <button class="nav-tab active" data-view="write" type="button" aria-current="page">Today</button>
-          <button class="nav-tab" data-view="history" type="button">Reflections</button>
+          <button class="nav-tab" data-view="history" type="button">Reflections<span class="nav-count" id="navCount">0</span></button>
           <button class="icon-btn" id="logoutBtn" type="button" aria-label="Log out" title="Log out">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -907,29 +937,7 @@
           <p class="date-greeting" id="dateGreeting"></p>
         </div>
 
-        <div class="compose">
-          <p class="compose-prompt" id="composePrompt">What's alive in you right now?</p>
-          <label class="sr-only" for="entryInput">Write your reflection</label>
-          <textarea 
-            id="entryInput" 
-            class="compose-field"
-            placeholder="Begin anywhere. There's no wrong way to start."
-            aria-describedby="wordCount"
-          ></textarea>
-          <div class="compose-meta">
-            <div class="word-count" id="wordCount" aria-live="polite">0 words</div>
-            <div class="compose-actions">
-              <button class="btn-ghost" id="clearBtn" type="button">Clear</button>
-              <button class="btn-primary" id="submitBtn" type="button">
-                Reflect
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
+        <div class="compose-wrap">
           <article class="reflection" id="reflectionBox" aria-live="polite">
             <header class="reflection-header">
               <div class="reflection-mark" aria-hidden="true"></div>
@@ -937,6 +945,30 @@
             </header>
             <div class="reflection-body" id="reflectionBody"></div>
           </article>
+
+          <div class="compose">
+            <p class="compose-prompt" id="composePrompt">What's alive in you right now?</p>
+            <label class="sr-only" for="entryInput">Write your reflection</label>
+            <textarea 
+              id="entryInput" 
+              class="compose-field"
+              placeholder="Begin anywhere. There's no wrong way to start."
+              aria-describedby="wordCount"
+            ></textarea>
+            <div class="compose-meta">
+              <div class="word-count" id="wordCount" aria-live="polite">0 words</div>
+              <div class="compose-actions">
+                <button class="btn-ghost" id="clearBtn" type="button">Clear</button>
+                <button class="btn-primary" id="submitBtn" type="button">
+                  Reflect
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1110,6 +1142,7 @@
         await streamReflection(responseText);
         entryInput.value = "";
         entryInput.dispatchEvent(new Event("input"));
+        loadEntries();
       } catch (err) {
         console.error(err);
         reflectionBox.classList.remove("visible");
@@ -1166,8 +1199,12 @@
 
       const list = document.getElementById("threadList");
       const empty = document.getElementById("emptyState");
+      const count = entries?.length || 0;
 
-      if (!entries || entries.length === 0) {
+      // Update nav count badge
+      document.getElementById("navCount").textContent = count;
+
+      if (count === 0) {
         list.innerHTML = "";
         empty.style.display = "block";
         return;
