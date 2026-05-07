@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ec">
+  <title>Loop — A quiet place to think</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============ DESIGN TOKENS ============ */
+    :root {
+      /* Color — Light mode (default): warm paper, deep ink */
+      --paper: #f7f3ec;
+      --paper-soft: #efe9df;
+      --paper-card: #fdfaf4;
+      --ink: #1a1612;
+      --ink-soft: #4a3f36;
+      --ink-muted: #8a7a6c;
+      --ink-faint: #b8aa9a;
+      --rule: #e0d5c4;
+      --rule-soft: #ece4d4;
+      --accent: #b85c3c;        /* terracotta — warm, human, distinct */
+      --accent-soft: #d4866a;
+      --accent-bg: rgba(184, 92, 60, 0.08);
+      --shadow: 0 1px 2px rgba(26, 22, 18, 0.04), 0 8px 24px rgba(26, 22, 18, 0.06);
+      --shadow-lift: 0 2px 4px rgba(26, 22, 18, 0.06), 0 16px 40px rgba(26, 22, 18, 0.08);
+
+      /* Type */
+      --font-serif: "Fraunces", Georgia, serif;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+      /* Space (8pt grid) */
+      --s-1: 4px;
+      --s-2: 8px;
+      --s-3: 12px;
+      --s-4: 16px;
+      --s-5: 24px;
+      --s-6: 32px;
+      --s-7: 48px;
+      --s-8: 64px;
+      --s-9: 96px;
+
+      /* Radius */
+      --r-sm: 6px;
+      --r-md: 12px;
+      --r-lg: 20px;
+
+      /* Motion */
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --dur-fast: 180ms;
+      --dur: 320ms;
+      --dur-slow: 600ms;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #16130f;
+        --paper-soft: #1f1b16;
+        --paper-card: #1a1713;
+        --ink: #f5efe4;
+        --ink-soft: #c9beae;
+        --ink-muted: #8f8275;
+        --ink-faint: #5a5043;
+        --rule: #2e2820;
+        --rule-soft: #241f19;
+        --accent: #e89a7a;
+        --accent-soft: #f0b095;
+        --accent-bg: rgba(232, 154, 122, 0.1);
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+        --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ============ RESET ============ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: var(--r-sm);
+    }
+
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 8px;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 8px 16px;
+      border-radius: var(--r-sm);
+      z-index: 100;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 8px;
+    }
+
+    /* ============ AUTH SCREEN ============ */
+    .auth-screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--s-7) var(--s-5);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient background mark */
+    .auth-screen::before {
+      content: "";
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .auth-screen::after {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .auth-content {
+      position: relative;
+      z-index: 1;
+      max-width: 440px;
+      width: 100%;
+    }
+
+    .auth-mark {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto var(--s-6);
+      border: 1.5px solid var(--ink);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: gentle-pulse 4s var(--ease) infinite;
+    }
+
+    .auth-mark::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    @keyframes gentle-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    .auth-title {
+      font-family: var(--font-serif);
+      font-size: clamp(40px, 8vw, 64px);
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--s-4);
+      color: var(--ink);
+    }
+
+    .auth-title em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+
+    .auth-subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(16px, 3vw, 19px);
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin-bottom: var(--s-7);
+      max-width: 380px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s-3);
+      padding: 14px 28px;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all var(--dur-fast) var(--ease);
+      min-height: 48px;
+    }
+
+    .btn-google:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .btn-google:active {
+      transform: translateY(0);
+    }
+
+    .auth-footer {
+      position: absolute;
+      bottom: var(--s-6);
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-faint);
+      letter-spacing: 0.04em;
+      z-index: 1;
+    }
+
+    /* ============ APP SHELL ============ */
+    .app {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============ HEADER ============ */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(247, 243, 236, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--rule-soft);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .app-header {
+        background: rgba(22, 19, 15, 0.85);
+      }
+    }
+
+    .header-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: var(--s-4) var(--s-5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--s-3);
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid var(--ink);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-mark::after {
+      content: "";
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .brand-name {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: var(--s-1);
+      align-items: center;
+    }
+
+    .nav-tab {
+      padding: var(--s-2) var(--s-3);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      border-radius: var(--r-sm);
+      transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-tab:hover {
+      color: var(--ink);
+      background: var(--paper-soft);
+    }
+
+    .nav-tab.active {
+      color: var(--ink);
+      background: var(--accent-bg);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-muted);
+      transition: all var(--dur-fast) var(--ease);
+    }
+
+    .icon-btn:hover {
+      color: var(--ink);
+      background: var(--paper-soft);
+    }
+
+    /* ============ MAIN ============ */
+    .main {
+      flex: 1;
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--s-7) var(--s-5) var(--s-9);
+    }
+
+    .view {
+      display: none;
+      animation: enter var(--dur) var(--ease);
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============ DATE HERO ============ */
+    .date-hero {
+      margin-bottom: var(--s-8);
+      padding-bottom: var(--s-6);
+      border-bottom: 1px solid var(--rule-soft);
+    }
+
+    .date-eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: var(--s-3);
+    }
+
+    .date-display {
+      font-family: var(--font-serif);
+      font-size: clamp(36px, 7vw, 56px);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: var(--s-2);
+    }
+
+    .date-greeting {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(17px, 3vw, 20px);
+      color: var(--ink-soft);
+      line-height: 1.4;
+    }
+
+    /* ============ COMPOSE ============ */
+    .compose {
+      margin-bottom: var(--s-8);
+    }
+
+    .compose-prompt {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 17px;
+      color: var(--ink-soft);
+      margin-bottom: var(--s-4);
+    }
+
+    .compose-field {
+      width: 100%;
+      min-height: 200px;
+      padding: var(--s-5);
+      background: var(--paper-card);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-md);
+      font-family: var(--font-serif);
+      font-size: 18px;
+      line-height: 1.65;
+      color: var(--ink);
+      resize: vertical;
+      transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+    }
+
+    .compose-field:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-bg);
+    }
+
+    .compose-field::placeholder {
+      color: var(--ink-faint);
+      font-style: italic;
+    }
+
+    .compose-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--s-3);
+      gap: var(--s-3);
+      flex-wrap: wrap;
+    }
+
+    .word-count {
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+      transition: color var(--dur-fast) var(--ease);
+    }
+
+    .word-count.has-content {
+      color: var(--ink-soft);
+    }
+
+    .compose-actions {
+      display: flex;
+      gap: var(--s-2);
+      align-items: center;
+    }
+
+    .btn-ghost {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      border-radius: 999px;
+      min-height: 40px;
+      transition: all var(--dur-fast) var(--ease);
+    }
+
+    .btn-ghost:hover {
+      color: var(--ink);
+      background: var(--paper-soft);
+    }
+
+    .btn-primary {
+      padding: 10px 22px;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+      min-height: 40px;
+      transition: all var(--dur-fast) var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s-2);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ============ REFLECTION ============ */
+    .reflection {
+      display: none;
+      margin-top: var(--s-7);
+      animation: reflectionEnter var(--dur-slow) var(--ease);
+    }
+
+    .reflection.visible {
+      display: block;
+    }
+
+    @keyframes reflectionEnter {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reflection-header {
+      display: flex;
+      align-items: center;
+      gap: var(--s-3);
+      margin-bottom: var(--s-4);
+    }
+
+    .reflection-mark {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      animation: thinking 2s var(--ease) infinite;
+    }
+
+    .reflection-mark::after {
+      content: "";
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .reflection.done .reflection-mark {
+      animation: none;
+    }
+
+    @keyframes thinking {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    .reflection-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .reflection-body {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      line-height: 1.65;
+      color: var(--ink);
+      padding-left: 36px;
+      position: relative;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .reflection-body::before {
+      content: "";
+      position: absolute;
+      left: 11px;
+      top: 6px;
+      bottom: 0;
+      width: 1px;
+      background: var(--rule);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* ============ REFLECTIONS LIST (history) ============ */
+    .history-intro {
+      margin-bottom: var(--s-8);
+      padding-bottom: var(--s-6);
+      border-bottom: 1px solid var(--rule-soft);
+    }
+
+    .history-title {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 6vw, 44px);
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--s-3);
+    }
+
+    .history-subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 17px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    .history-thread {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s-7);
+    }
+
+    .thread-entry {
+      animation: enter var(--dur) var(--ease);
+    }
+
+    .thread-date {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: var(--s-3);
+      display: flex;
+      align-items: center;
+      gap: var(--s-3);
+    }
+
+    .thread-date::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--rule-soft);
+    }
+
+    .thread-content {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--ink);
+      margin-bottom: var(--s-4);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .thread-reflection {
+      padding-left: 24px;
+      border-left: 2px solid var(--accent-soft);
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ============ EMPTY STATE ============ */
+    .empty {
+      text-align: center;
+      padding: var(--s-9) var(--s-5);
+    }
+
+    .empty-mark {
+      width: 80px;
+      height: 80px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      margin: 0 auto var(--s-5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-mark::after {
+      content: "";
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 22px;
+      color: var(--ink-soft);
+      margin-bottom: var(--s-3);
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: var(--ink-muted);
+      max-width: 320px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ============ TOAST ============ */
+    .toast {
+      position: fixed;
+      bottom: var(--s-5);
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lift);
+      transition: transform var(--dur) var(--ease);
+      z-index: 50;
+      max-width: calc(100vw - 32px);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 640px) {
+      .main {
+        padding: var(--s-5) var(--s-4) var(--s-8);
+      }
+
+      .header-inner {
+        padding: var(--s-3) var(--s-4);
+      }
+
+      .compose-field {
+        font-size: 17px;
+        padding: var(--s-4);
+        min-height: 180px;
+      }
+
+      .compose-meta {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+
+      .compose-actions {
+        justify-content: space-between;
+      }
+
+      .btn-primary, .btn-ghost {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .reflection-body {
+        font-size: 17px;
+        padding-left: 28px;
+      }
+
+      .reflection-body::before {
+        left: 9px;
+      }
+
+      .nav-tab {
+        padding: var(--s-2);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .main {
+        padding-top: var(--s-9);
+      }
+    }
+
+    /* ============ UTILITIES ============ */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- ============ AUTH ============ -->
+  <div id="authView" class="auth-screen" role="main" aria-labelledby="authTitle">
+    <div class="auth-content">
+      <div class="auth-mark" aria-hidden="true"></div>
+      <h1 id="authTitle" class="auth-title">Loop</h1>
+      <p class="auth-subtitle">A quiet place to think,<br>with someone who listens.</p>
+      <button class="btn-google" id="googleLoginBtn" type="button">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+    </div>
+    <div class="auth-footer">Your entries are private.</div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="appView" class="app" style="display: none;">
+    <header class="app-header" role="banner">
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <span class="brand-name">Loop</span>
+        </div>
+        <nav class="header-nav" role="navigation" aria-label="Main">
+          <button class="nav-tab active" data-view="write" type="button" aria-current="page">Today</button>
+          <button class="nav-tab" data-view="history" type="button">Reflections</button>
+          <button class="icon-btn" id="logoutBtn" type="button" aria-label="Log out" title="Log out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main" id="main-content">
+      <!-- Write view -->
+      <section id="writeView" class="view active" aria-labelledby="dateDisplay">
+        <div class="date-hero">
+          <div class="date-eyebrow" id="dateEyebrow">Today</div>
+          <h1 class="date-display" id="dateDisplay"></h1>
+          <p class="date-greeting" id="dateGreeting"></p>
+        </div>
+
+        <div class="compose">
+          <p class="compose-prompt" id="composePrompt">What's alive in you right now?</p>
+          <label class="sr-only" for="entryInput">Write your reflection</label>
+          <textarea 
+            id="entryInput" 
+            class="compose-field"
+            placeholder="Begin anywhere. There's no wrong way to start."
+            aria-describedby="wordCount"
+          ></textarea>
+          <div class="compose-meta">
+            <div class="word-count" id="wordCount" aria-live="polite">0 words</div>
+            <div class="compose-actions">
+              <button class="btn-ghost" id="clearBtn" type="button">Clear</button>
+              <button class="btn-primary" id="submitBtn" type="button">
+                Reflect
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <article class="reflection" id="reflectionBox" aria-live="polite">
+            <header class="reflection-header">
+              <div class="reflection-mark" aria-hidden="true"></div>
+              <div class="reflection-label">Loop</div>
+            </header>
+            <div class="reflection-body" id="reflectionBody"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- History view -->
+      <section id="historyView" class="view" aria-labelledby="historyTitle">
+        <div class="history-intro">
+          <h1 class="history-title" id="historyTitle">Your reflections</h1>
+          <p class="history-subtitle">A thread of thoughts, returning.</p>
+        </div>
+        <div id="threadList" class="history-thread"></div>
+        <div class="empty" id="emptyState" style="display: none;">
+          <div class="empty-mark" aria-hidden="true"></div>
+          <p class="empty-title">Nothing here yet.</p>
+          <p class="empty-text">Your first reflection will live here, along with everything that follows.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4"></script>
+  <script>
+    let currentUser = null;
+    let supabaseClient = null;
+
+    /* ============ DATE / GREETING ============ */
+    function setDateAndGreeting() {
+      const now = new Date();
+      const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+      document.getElementById("dateDisplay").textContent = now.toLocaleDateString('en-US', opts);
+
+      const hour = now.getHours();
+      let greeting, prompt;
+      if (hour < 5) {
+        greeting = "A quiet hour.";
+        prompt = "What's keeping you up?";
+      } else if (hour < 12) {
+        greeting = "Good morning.";
+        prompt = "What's on your mind as the day begins?";
+      } else if (hour < 17) {
+        greeting = "Good afternoon.";
+        prompt = "How is the day finding you?";
+      } else if (hour < 21) {
+        greeting = "Good evening.";
+        prompt = "What's been on your mind today?";
+      } else {
+        greeting = "A late thought, perhaps.";
+        prompt = "What's settling in as the day closes?";
+      }
+      document.getElementById("dateGreeting").textContent = greeting;
+      document.getElementById("composePrompt").textContent = prompt;
+    }
+
+    /* ============ SUPABASE INIT ============ */
+    async function initSupabase() {
+      if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+        console.error("❌ Missing Supabase config");
+        showToast("Configuration missing");
+        return;
+      }
+      const { createClient } = supabase;
+      supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        currentUser = user;
+        showApp();
+      }
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          currentUser = session.user;
+          showApp();
+        } else {
+          currentUser = null;
+          showAuth();
+        }
+      });
+    }
+
+    function showAuth() {
+      document.getElementById("authView").style.display = "flex";
+      document.getElementById("appView").style.display = "none";
+    }
+
+    function showApp() {
+      document.getElementById("authView").style.display = "none";
+      document.getElementById("appView").style.display = "flex";
+      setDateAndGreeting();
+      loadEntries();
+    }
+
+    /* ============ AUTH ============ */
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      });
+      if (error) showToast("Login failed");
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+    });
+
+    /* ============ NAVIGATION ============ */
+    document.querySelectorAll(".nav-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        const viewName = tab.dataset.view;
+        document.querySelectorAll(".nav-tab").forEach(t => {
+          t.classList.remove("active");
+          t.removeAttribute("aria-current");
+        });
+        tab.classList.add("active");
+        tab.setAttribute("aria-current", "page");
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        document.getElementById(viewName + "View").classList.add("active");
+        if (viewName === "history") loadEntries();
+      });
+    });
+
+    /* ============ COMPOSE ============ */
+    const entryInput = document.getElementById("entryInput");
+    const wordCount = document.getElementById("wordCount");
+
+    entryInput.addEventListener("input", () => {
+      const text = entryInput.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      wordCount.textContent = words === 1 ? "1 word" : words + " words";
+      wordCount.classList.toggle("has-content", words > 0);
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      entryInput.value = "";
+      entryInput.dispatchEvent(new Event("input"));
+      document.getElementById("reflectionBox").classList.remove("visible", "done");
+      entryInput.focus();
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", submitEntry);
+    entryInput.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") submitEntry();
+    });
+
+    async function submitEntry() {
+      const text = entryInput.value.trim();
+      if (!text) return;
+      const btn = document.getElementById("submitBtn");
+      const reflectionBox = document.getElementById("reflectionBox");
+      const reflectionBody = document.getElementById("reflectionBody");
+
+      btn.disabled = true;
+      reflectionBox.classList.add("visible");
+      reflectionBox.classList.remove("done");
+      reflectionBody.innerHTML = '<span class="cursor"></span>';
+
+      try {
+        const { data, error: insertError } = await supabaseClient
+          .from("entries")
+          .insert([{ user_id: currentUser.id, content: text, created_at: new Date().toISOString() }])
+          .select();
+        if (insertError) throw insertError;
+
+        const responseText = await getAIResponse(text);
+
+        await supabaseClient
+          .from("responses")
+          .insert([{ entry_id: data[0].id, response: responseText }]);
+
+        await streamReflection(responseText);
+        entryInput.value = "";
+        entryInput.dispatchEvent(new Event("input"));
+      } catch (err) {
+        console.error(err);
+        reflectionBox.classList.remove("visible");
+        showToast("Something went wrong. Try again.");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function getAIResponse(entryText) {
+      if (!window.GEMINI_API_KEY) return "I need my API key to respond. Check config.js";
+      const systemPrompt = "You are Loop — a journal companion. You write like a wise, warm friend who listens carefully and reflects back what they hear. Read what the person wrote, and respond in 2-3 sentences. Acknowledge what's true. Ask one genuine question. Avoid platitudes, advice, or clinical language. Sound human, never therapeutic.";
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${window.GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: "user", parts: [{ text: entryText }] }],
+            generationConfig: {
+              temperature: 0.85,
+              maxOutputTokens: 1000,
+              thinkingConfig: { thinkingBudget: 0 }
+            }
+          })
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+        return data.candidates[0].content.parts[0].text;
+      } catch (error) {
+        console.error("AI error:", error);
+        return "I'm here, but I'm having trouble finding the right words. Try sending again?";
+      }
+    }
+
+    async function streamReflection(text) {
+      const body = document.getElementById("reflectionBody");
+      const box = document.getElementById("reflectionBox");
+      body.textContent = "";
+      const cursor = document.createElement("span");
+      cursor.className = "cursor";
+      body.appendChild(cursor);
+
+      for (let i = 0; i < text.length; i++) {
+        const charNode = document.createTextNode(text[i]);
+        body.insertBefore(charNode, cursor);
+        await new Promise(r => setTimeout(r, 18));
+      }
+      cursor.remove();
+      box.classList.add("done");
+    }
+
+    /* ============ HISTORY ============ */
+    async function loadEntries() {
+      if (!currentUser) return;
+      const { data: entries } = await supabaseClient
+        .from("entries")
+        .select("id, content, created_at, responses(response)")
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: false });
+
+      const list = document.getElementById("threadList");
+      const empty = document.getElementById("emptyState");
+
+      if (!entries || entries.length === 0) {
+        list.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+      list.innerHTML = entries.map(e => {
+        const d = new Date(e.created_at);
+        const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const reflection = e.responses?.[0]?.response;
+        return `
+          <article class="thread-entry">
+            <div class="thread-date">${dateStr} · ${timeStr}</div>
+            <div class="thread-content">${escapeHtml(e.content)}</div>
+            ${reflection ? `<div class="thread-reflection">${escapeHtml(reflection)}</div>` : ""}
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(s) {
+      const div = document.createElement("div");
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    /* ============ TOAST ============ */
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    /* ============ START ============ */
+    initSupabase();
+  </script>
+</body>
+</html>
